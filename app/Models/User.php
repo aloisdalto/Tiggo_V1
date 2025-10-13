@@ -7,10 +7,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, HasRoles;
 
     /**
      * The attributes that are mass assignable.
@@ -21,6 +22,9 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'phone',
+        'latitude',
+        'longitude'
     ];
 
     /**
@@ -40,5 +44,32 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'latitude' => 'decimal:7',
+        'longitude' => 'decimal:7',
     ];
+
+    //Relacion con cada tabla de la bd
+    // Relación 1 a 1 con TechnicianProfile
+    public function technicianProfile()
+    {
+        return $this->hasOne(TechnicianProfile::class); 
+    }
+
+    // Relación con solicitudes hechas (como cliente)
+    public function serviceRequests()
+    {
+        return $this->hasMany(ServiceRequest::class, 'cliente_id');
+    }
+
+    // Relación con calificaciones dadas (como cliente)
+    public function ratingsGiven()
+    {
+        return $this->hasMany(Rating::class, 'cliente_id');
+    }
+
+    // Relación con calificaciones recibidas (como técnico)
+    public function ratingsReceived()
+    {
+        return $this->hasMany(Rating::class, 'tecnico_id');
+    }
 }
